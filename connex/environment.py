@@ -4,6 +4,7 @@ class k_in_a_row():
   def __init__(self, rows, columns, row_length):
     self.row_length = row_length
     self.environment = np.zeros((rows, columns), dtype=int)
+    self.rewards = []
     self.history = []
 
   def rows(self):
@@ -45,6 +46,12 @@ class k_in_a_row():
       if self.environment[i][action] == 0:
         self.environment[i][action] = self.to_play()
         break
+    reward = 0
+    if self.terminal() and len(self.history) != self.environment.size:
+      reward = self.to_play()
+    elif self.to_play() and action not in self.legal_actions():
+      reward = -1
+    self.rewards.append(reward)
     self.history.append(action)
 
   def to_play(self):
