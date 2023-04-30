@@ -13,7 +13,7 @@ class k_in_a_row():
   def columns(self):
     return self.environment.shape[1]
 
-  def terminal(self):
+  def is_terminal(self):
     if len(self.history) == self.environment.size:
       return True
     lines = (
@@ -47,7 +47,7 @@ class k_in_a_row():
         self.environment[i][action] = self.to_play()
         break
     reward = 0
-    if self.terminal() and len(self.history) != self.environment.size:
+    if self.is_terminal() and len(self.history) != self.environment.size:
       reward = self.to_play()
     elif self.to_play() and action not in self.legal_actions():
       reward = -1
