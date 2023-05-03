@@ -56,7 +56,7 @@ class k_in_a_row():
 
   def make_image(self):
     players = (np.where(self.environment == 1, 1, 0), np.where(self.environment == -1, 1, 0))
-    return np.array([players[0], players[1], np.full((self.environment.shape), self.to_play())])
+    return np.array([players[0], players[1]])
 
   def to_play(self):
     if len(self.history) % 2 == 0:
