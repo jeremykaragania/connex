@@ -6,6 +6,7 @@ class k_in_a_row():
     self.environment = np.zeros((rows, columns), dtype=int)
     self.rewards = []
     self.action_history = []
+    self.environment_history = [np.copy(self.environment)]
 
   def rows(self):
     return self.environment.shape[0]
@@ -53,9 +54,10 @@ class k_in_a_row():
       reward = -1
     self.rewards.append(reward)
     self.action_history.append(action)
+    self.environment_history.append(np.copy(self.environment))
 
-  def make_image(self):
-    players = (np.where(self.environment == 1, 1, 0), np.where(self.environment == -1, 1, 0))
+  def make_image(self, state_index):
+    players = (np.where(self.environment_history[state_index] == 1, 1, 0), np.where(self.environment_history[state_index] == -1, 1, 0))
     return np.array([players[0], players[1]], dtype=np.float32)
 
   def to_play(self):
