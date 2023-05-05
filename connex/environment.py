@@ -5,7 +5,7 @@ class k_in_a_row():
     self.row_length = row_length
     self.environment = np.zeros((rows, columns), dtype=int)
     self.rewards = []
-    self.history = []
+    self.action_history = []
 
   def rows(self):
     return self.environment.shape[0]
@@ -14,7 +14,7 @@ class k_in_a_row():
     return self.environment.shape[1]
 
   def is_terminal(self):
-    if len(self.history) == self.environment.size:
+    if len(self.action_history) == self.environment.size:
       return True
     lines = (
       lambda x, y, d: self.environment[x+d][y],
@@ -47,18 +47,18 @@ class k_in_a_row():
         self.environment[i][action] = self.to_play()
         break
     reward = 0
-    if self.is_terminal() and len(self.history) != self.environment.size:
+    if self.is_terminal() and len(self.action_history) != self.environment.size:
       reward = self.to_play()
     elif self.to_play() and action not in self.legal_actions():
       reward = -1
     self.rewards.append(reward)
-    self.history.append(action)
+    self.action_history.append(action)
 
   def make_image(self):
     players = (np.where(self.environment == 1, 1, 0), np.where(self.environment == -1, 1, 0))
     return np.array([players[0], players[1]], dtype=np.float32)
 
   def to_play(self):
-    if len(self.history) % 2 == 0:
+    if len(self.action_history) % 2 == 0:
       return 1
     return -1
