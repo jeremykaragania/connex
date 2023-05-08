@@ -1,7 +1,7 @@
 import math
 import numpy as np
 
-class minimax_stats():
+class min_max_stats():
   def __init__(self):
     self.maximum = -float("inf")
     self.minimum= float("inf")
