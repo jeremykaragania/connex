@@ -33,6 +33,10 @@ class node():
       return 0
     return self.value_sum / self.visit_count
 
+def select_child(n, stats):
+  action, child = max((ucb_score(n, j, stats), i, j) for i, j in n.children.items())[1:]
+  return action, child
+
 def ucb_score(parent, child, stats):
   base = 19652
   init = 1.25
