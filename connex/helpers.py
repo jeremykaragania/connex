@@ -1,6 +1,9 @@
 import math
 import numpy as np
 
+def visit_softmax_temperature(num_moves, training_steps):
+  return 1 if num_moves > 30 else 0
+
 class min_max_stats():
   def __init__(self):
     self.maximum = -float("inf")
