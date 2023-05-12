@@ -1,7 +1,7 @@
 import math
 import numpy as np
 
-def visit_softmax_temperature(num_moves, training_steps):
+def visit_softmax_temperature(num_moves):
   return 1 if num_moves > 30 else 0
 
 class min_max_stats():
