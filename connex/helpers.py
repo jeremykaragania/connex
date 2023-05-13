@@ -40,6 +40,13 @@ def select_child(n, stats):
   action, child = max((ucb_score(n, j, stats), i, j) for i, j in n.children.items())[1:]
   return action, child
 
+def select_action(action_space_size, num_moves, n, model):
+  visit_counts = np.zeros(action_space_size)
+  for i, j in n.children.items():
+    visit_counts[i] = j.visit_count
+  temperature = visit_softmax_temperature(num_moves)
+  return softmax_sample(visit_counts, temperature)
+
 def ucb_score(parent, child, stats):
   base = 19652
   init = 1.25
@@ -77,3 +84,10 @@ def add_exploration_noise(n, alpha):
   noise = np.random.dirichlet([alpha] * len(actions))
   for i, j in zip(actions, noise):
     n.children[i].prior = n.children[i].prior * (1 - frac) + j * frac
+
+def softmax_sample(distribution, temperature):
+  if temperature == 0:
+    temperature = 1
+  distribution = np.array(distribution) ** (1 / temperature)
+  sample_temp = distribution/distribution.sum()
+  return np.argmax(np.random.multinomial(1, sample_temp))
