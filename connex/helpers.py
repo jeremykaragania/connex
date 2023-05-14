@@ -60,8 +60,7 @@ def ucb_score(parent, child, stats):
     value_score = 0
   return prior_score + value_score
 
-def expand_node(n, to_play, actions, output):
-  discount = 0.95
+def expand_node(n, to_play, actions, output, discount=0.95):
   n.to_play = to_play
   n.state = output.state
   n.reward = output.reward
@@ -70,8 +69,7 @@ def expand_node(n, to_play, actions, output):
   for i, j in policy.items():
     n.children[i] = node(j / policy_sum)
 
-def backpropagate(search_path, value, to_play, stats):
-  discount = 0.95
+def backpropagate(search_path, value, to_play, stats, discount=0.95):
   for i in reversed(search_path):
     i.value_sum += value if i.to_play == to_play else -value
     i.visit_count += 1
