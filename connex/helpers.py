@@ -47,10 +47,7 @@ def select_action(action_space_size, num_moves, n, model):
   temperature = visit_softmax_temperature(num_moves)
   return softmax_sample(visit_counts, temperature)
 
-def ucb_score(parent, child, stats):
-  base = 19652
-  init = 1.25
-  discount = 0.95
+def ucb_score(parent, child, stats, base=19652, init=1.25, discount=0.95):
   pb_c = math.log((parent.visit_count + base + 1) / base) + init
   pb_c *= math.sqrt(parent.visit_count) / (child.visit_count + 1)
   prior_score = pb_c * child.prior
@@ -60,7 +57,7 @@ def ucb_score(parent, child, stats):
     value_score = 0
   return prior_score + value_score
 
-def expand_node(n, to_play, actions, output, discount=0.95):
+def expand_node(n, to_play, actions, output):
   n.to_play = to_play
   n.state = output.state
   n.reward = output.reward
@@ -76,9 +73,8 @@ def backpropagate(search_path, value, to_play, stats, discount=0.95):
     stats.update(i.value())
     value = i.reward + discount * value
 
-def add_exploration_noise(n, alpha):
+def add_exploration_noise(n, alpha=0.3, frac=0.25):
   actions = list(n.children.keys())
-  frac = 0.25
   noise = np.random.dirichlet([alpha] * len(actions))
   for i, j in zip(actions, noise):
     n.children[i].prior = n.children[i].prior * (1 - frac) + j * frac
