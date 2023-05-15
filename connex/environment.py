@@ -7,6 +7,8 @@ class k_in_a_row():
     self.rewards = []
     self.action_history = []
     self.environment_history = [np.copy(self.environment)]
+    self.child_visits = []
+    self.root_values = []
 
   def rows(self):
     return self.environment.shape[0]
@@ -55,6 +57,12 @@ class k_in_a_row():
     self.rewards.append(reward)
     self.action_history.append(action)
     self.environment_history.append(np.copy(self.environment))
+
+  def store_search_statistics(self, root):
+    sum_visits = sum(child.visit_count for child in root.children.values())
+    action_space = [i for i in range(self.columns())]
+    self.child_visits.append([root.children[i].visit_count / sum_visits if i in root.children else 0 for i in action_space])
+    self.root_values.append(root.value())
 
   def make_image(self, state_index):
     players = (np.where(self.environment_history[state_index] == 1, 1, 0), np.where(self.environment_history[state_index] == -1, 1, 0))
