@@ -24,3 +24,20 @@ class representation_function(nn.Module):
     for i in self.residual_blocks:
       s = i(s)
     return s
+
+class prediction_function(nn.Module):
+  def __init__(self, action_space_size, environment_size):
+    super().__init__()
+    self.p_convolutions = nn.ModuleList([nn.Conv2d(2, 4, 1), nn.Conv2d(4, 1, 1)])
+    self.p_linear = nn.Linear(environment_size, action_space_size)
+    self.v_convolutions = nn.ModuleList([nn.Conv2d(2, 4, 1), nn.Conv2d(4, 1, 1)])
+    self.v_linear = nn.Linear(environment_size, 1)
+
+  def forward(self, state):
+    p = F.relu(self.p_convolutions[0](state))
+    p = self.p_convolutions[1](p)
+    p = F.softmax(self.p_linear(p.flatten()), 0)
+    v = self.v_convolutions[0](state)
+    v = self.v_convolutions[1](v)
+    v = torch.tanh(self.v_linear(v.flatten()))
+    return p, v
