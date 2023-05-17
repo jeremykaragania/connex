@@ -25,6 +25,23 @@ class representation_function(nn.Module):
       s = i(s)
     return s
 
+class dynamics_function(nn.Module):
+  def __init__(self, action_space_size, environment_size):
+    super().__init__()
+    self.s_convolution = nn.Conv2d(4, 2, 3, padding=1)
+    self.s_residual_blocks = nn.ModuleList([residual_block(2) for i in range(2)])
+    self.r_convolution = nn.Conv2d(2, 1, 3, padding=1)
+    self.r_linear = nn.Linear(environment_size, 1)
+
+  def forward(self, state, action):
+    s = torch.cat([state, action])
+    s = self.s_convolution(s)
+    for i in self.s_residual_blocks:
+      s = i(s)
+    r = self.r_convolution(s)
+    r = torch.tanh(self.r_linear(r.flatten()))
+    return r, s
+
 class prediction_function(nn.Module):
   def __init__(self, action_space_size, environment_size):
     super().__init__()
