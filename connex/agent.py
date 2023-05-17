@@ -1,4 +1,5 @@
 import collections
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -58,3 +59,20 @@ class prediction_function(nn.Module):
     v = self.v_convolutions[1](v)
     v = torch.tanh(self.v_linear(v.flatten()))
     return p, v
+
+class model():
+  def __init__(self, action_space_size, environment_size):
+    self.representation = representation_function()
+    self.dynamics = dynamics_function(action_space_size, environment_size)
+    self.prediction = prediction_function(action_space_size, environment_size)
+
+  def initial_inference(self, image):
+    s = self.representation(image)
+    p, v = self.prediction(s)
+    return model_output(0, s, p, v.item())
+
+  def recurrent_inference(self, state, action):
+    action = torch.from_numpy(np.full(state.shape, action))
+    r, s = self.dynamics(state, action)
+    p, v = self.prediction(s)
+    return model_output(r, s, p, v.item())
