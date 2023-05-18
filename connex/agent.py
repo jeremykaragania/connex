@@ -61,8 +61,9 @@ class prediction_function(nn.Module):
     v = torch.tanh(self.v_linear(v.flatten()))
     return p, v
 
-class model():
+class model(nn.Module):
   def __init__(self, action_space_size, environment_size):
+    super().__init__()
     self.representation = representation_function()
     self.dynamics = dynamics_function(environment_size)
     self.prediction = prediction_function(action_space_size, environment_size)
