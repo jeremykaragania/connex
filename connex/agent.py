@@ -27,7 +27,7 @@ class representation_function(nn.Module):
     return s
 
 class dynamics_function(nn.Module):
-  def __init__(self, action_space_size, environment_size):
+  def __init__(self, environment_size):
     super().__init__()
     self.s_convolution = nn.Conv2d(4, 2, 3, padding=1)
     self.s_residual_blocks = nn.ModuleList([residual_block(2) for i in range(2)])
@@ -63,7 +63,7 @@ class prediction_function(nn.Module):
 class model():
   def __init__(self, action_space_size, environment_size):
     self.representation = representation_function()
-    self.dynamics = dynamics_function(action_space_size, environment_size)
+    self.dynamics = dynamics_function(environment_size)
     self.prediction = prediction_function(action_space_size, environment_size)
 
   def initial_inference(self, image):
