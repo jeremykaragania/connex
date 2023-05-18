@@ -79,6 +79,22 @@ def add_exploration_noise(n, alpha=0.3, frac=0.25):
   for i, j in zip(actions, noise):
     n.children[i].prior = n.children[i].prior * (1 - frac) + j * frac
 
+def run_mcts(root, action_history, model, action_space_size, num_simulations=64):
+  stats = min_max_stats()
+  for i in range(num_simulations):
+    history = list(action_history)
+    node = root
+    search_path = [node]
+    while node.is_expanded():
+      action, node = select_child(node, stats)
+      history.append(action)
+      search_path.append(node)
+    parent = search_path[-2]
+    to_play = len(history) % 2 == 0
+    model_output = model.recurrent_inference(parent.state, history[-1])
+    expand_node(node, to_play, [j for j  in range(action_space_size)], model_output)
+    backpropagate(search_path, model_output.value, to_play, stats)
+
 def softmax_sample(distribution, temperature):
   if temperature == 0:
     temperature = 1
