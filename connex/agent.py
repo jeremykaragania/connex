@@ -1,3 +1,4 @@
+import helpers
 import collections
 import numpy as np
 import torch
@@ -76,3 +77,15 @@ class model():
     r, s = self.dynamics(state, action)
     p, v = self.prediction(s)
     return model_output(r, s, p, v.item())
+
+def play_game(model, game):
+  while not game.is_terminal():
+    root = helpers.node(0)
+    observation = game.make_image(-1)
+    helpers.expand_node(root, game.to_play(), game.legal_actions(), model.initial_inference(observation))
+    helpers.add_exploration_noise(root, 0.3)
+    helpers.run_mcts(root, game.action_history, model, game.columns())
+    action = helpers.select_action(game.columns(), len(game.action_history), root, model)
+    game.apply(action)
+    game.store_search_statistics(root)
+  return game
