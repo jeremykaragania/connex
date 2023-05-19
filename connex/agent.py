@@ -29,12 +29,12 @@ class representation_function(nn.Module):
     return s
 
 class dynamics_function(nn.Module):
-  def __init__(self, environment_size):
+  def __init__(self, config):
     super().__init__()
     self.s_convolution = nn.Conv2d(4, 2, 3, padding=1)
     self.s_residual_blocks = nn.ModuleList([residual_block(2) for i in range(2)])
     self.r_convolution = nn.Conv2d(2, 1, 3, padding=1)
-    self.r_linear = nn.Linear(environment_size, 1)
+    self.r_linear = nn.Linear(config.environment_size(), 1)
 
   def forward(self, state, action):
     s = torch.cat([state, action])
@@ -46,12 +46,12 @@ class dynamics_function(nn.Module):
     return r, s
 
 class prediction_function(nn.Module):
-  def __init__(self, action_space_size, environment_size):
+  def __init__(self, config):
     super().__init__()
     self.p_convolutions = nn.ModuleList([nn.Conv2d(2, 4, 1), nn.Conv2d(4, 1, 1)])
-    self.p_linear = nn.Linear(environment_size, action_space_size)
+    self.p_linear = nn.Linear(config.environment_size(), config.action_space_size)
     self.v_convolutions = nn.ModuleList([nn.Conv2d(2, 4, 1), nn.Conv2d(4, 1, 1)])
-    self.v_linear = nn.Linear(environment_size, 1)
+    self.v_linear = nn.Linear(config.environment_size(), 1)
 
   def forward(self, state):
     p = F.relu(self.p_convolutions[0](state))
@@ -63,11 +63,11 @@ class prediction_function(nn.Module):
     return p, v
 
 class model(nn.Module):
-  def __init__(self, action_space_size, environment_size):
+  def __init__(self, config):
     super().__init__()
     self.representation = representation_function()
-    self.dynamics = dynamics_function(environment_size)
-    self.prediction = prediction_function(action_space_size, environment_size)
+    self.dynamics = dynamics_function(config)
+    self.prediction = prediction_function(config)
 
   def initial_inference(self, image):
     s = self.representation(image)
@@ -80,15 +80,15 @@ class model(nn.Module):
     p, v = self.prediction(s)
     return model_output(r, s, p, v.item())
 
-def play_game(rows, columns, row_length, model):
-  game = environment.k_in_a_row(rows, columns, row_length)
+def play_game(config, model):
+  game = environment.k_in_a_row(config)
   while not game.is_terminal():
     root = helpers.node(0)
     observation = game.make_image(-1)
     helpers.expand_node(root, game.to_play(), game.legal_actions(), model.initial_inference(observation))
     helpers.add_exploration_noise(root, 0.3)
-    helpers.run_mcts(root, game.action_history, model, game.columns())
-    action = helpers.select_action(game.columns(), len(game.action_history), root, model)
+    helpers.run_mcts(root, game.action_history, model, config.action_space_size)
+    action = helpers.select_action(config.action_space_size, len(game.action_history), root, model)
     game.apply(action)
     game.store_search_statistics(root)
   return game
