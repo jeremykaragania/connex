@@ -95,6 +95,28 @@ def run_mcts(root, action_history, model, action_space_size, num_simulations=64)
     expand_node(node, to_play, [j for j  in range(action_space_size)], model_output)
     backpropagate(search_path, model_output.value, to_play, stats)
 
+class replay_buffer():
+  def __init__(self, window_size, batch_size):
+    self.window_size = window_size
+    self.batch_size = batch_size
+    self.buffer = []
+
+  def save_game(self, game):
+    if len(self.buffer) > self.window_size:
+      self.buffer.pop(0)
+    self.buffer.append(game)
+
+  def sample_batch(self, num_unroll_steps, td_steps):
+    games = [self.sample_game() for i in range(self.batch_size)]
+    game_pos = [(i, self.sample_position(i)) for i in games]
+    return [(i.make_image(j), i.action_history[j:j+num_unroll_steps], i.make_target(j, num_unroll_steps, td_steps, i.to_play())) for (i, j) in game_pos]
+
+  def sample_game(self):
+    return np.random.choice(self.buffer)
+
+  def sample_position(self, game):
+    return np.random.choice(len(game.environment_history))
+
 def softmax_sample(distribution, temperature):
   if temperature == 0:
     temperature = 1
