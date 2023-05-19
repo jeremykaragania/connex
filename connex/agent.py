@@ -1,3 +1,4 @@
+import environment
 import helpers
 import collections
 import numpy as np
@@ -79,7 +80,8 @@ class model(nn.Module):
     p, v = self.prediction(s)
     return model_output(r, s, p, v.item())
 
-def play_game(model, game):
+def play_game(rows, columns, row_length, model):
+  game = environment.k_in_a_row(rows, columns, row_length)
   while not game.is_terminal():
     root = helpers.node(0)
     observation = game.make_image(-1)
