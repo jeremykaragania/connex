@@ -68,6 +68,26 @@ class k_in_a_row():
     players = (np.where(self.environment_history[state_index] == 1, 1, 0), np.where(self.environment_history[state_index] == -1, 1, 0))
     return np.array([players[0], players[1]], dtype=np.float32)
 
+  def make_target(self, state_index, num_unroll_steps, td_steps, to_play):
+    targets = []
+    for i in range(state_index, state_index, + num_unroll_steps + 1):
+      bootstrap_index = i + td_steps
+      if bootstrap_index < len(self.root_values):
+        value = self.root_values[bootstrap_index] * self.discount ** td_steps
+      else:
+        value = 0
+      for j, k in enumerate(self.rewards[current_index:bootstrap_index]):
+        value += reward * self.discount ** i
+      if current_index > 0 and current_index <= len(self.rewards):
+        last_reward = self.rewards[current_index-1]
+      else:
+        last_reward = 0
+      if current_index < len(self.root_values):
+        targets.append((value, last_reward, self.child_visits[current_index]))
+      else:
+        targets.append((0, last_reward, []))
+    return targets
+
   def to_play(self):
     if len(self.action_history) % 2 == 0:
       return 1
