@@ -109,7 +109,7 @@ class replay_buffer():
   def sample_batch(self, num_unroll_steps, td_steps):
     games = [self.sample_game() for i in range(self.batch_size)]
     game_pos = [(i, self.sample_position(i)) for i in games]
-    return [(i.make_image(j), i.action_history[j:j+num_unroll_steps], i.make_target(j, num_unroll_steps, td_steps, i.to_play())) for (i, j) in game_pos]
+    return [(i.make_image(j), i.action_history[j:j+num_unroll_steps], i.make_target(j, num_unroll_steps, td_steps)) for i, j in game_pos]
 
   def sample_game(self):
     return np.random.choice(self.buffer)

@@ -76,22 +76,22 @@ class k_in_a_row():
     players = (np.where(self.environment_history[state_index] == 1, 1, 0), np.where(self.environment_history[state_index] == -1, 1, 0))
     return np.array([players[0], players[1]], dtype=np.float32)
 
-  def make_target(self, state_index, num_unroll_steps, td_steps, to_play):
+  def make_target(self, state_index, num_unroll_steps, td_steps, discount=0.95):
     targets = []
-    for i in range(state_index, state_index, + num_unroll_steps + 1):
+    for i in range(state_index, state_index + num_unroll_steps + 1):
       bootstrap_index = i + td_steps
       if bootstrap_index < len(self.root_values):
-        value = self.root_values[bootstrap_index] * self.discount ** td_steps
+        value = self.root_values[bootstrap_index] * discount ** td_steps
       else:
         value = 0
-      for j, k in enumerate(self.rewards[current_index:bootstrap_index]):
-        value += reward * self.discount ** i
-      if current_index > 0 and current_index <= len(self.rewards):
-        last_reward = self.rewards[current_index-1]
+      for j, k in enumerate(self.rewards[i:bootstrap_index]):
+        value += k * discount ** j
+      if i > 0 and i <= len(self.rewards):
+        last_reward = self.rewards[i-1]
       else:
         last_reward = 0
-      if current_index < len(self.root_values):
-        targets.append((value, last_reward, self.child_visits[current_index]))
+      if i < len(self.root_values):
+        targets.append((value, last_reward, self.child_visits[i]))
       else:
         targets.append((0, last_reward, []))
     return targets
