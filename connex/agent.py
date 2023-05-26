@@ -101,3 +101,9 @@ def play_game(game_config, model):
     game.apply(action)
     game.store_search_statistics(root)
   return game
+
+def run_selfplay(config, storage, replay_buffer):
+  while True:
+    m = storage[-1] if storage else model(config)
+    game = play_game(config, m)
+    replay_buffer.save_game(game)
