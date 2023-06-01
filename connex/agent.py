@@ -5,6 +5,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.optim as optim
 
 model_output = collections.namedtuple("model_output", ["reward", "state", "policy", "value"])
 
@@ -107,3 +108,38 @@ def run_selfplay(game_config, storage, replay_buffer):
     m = storage[-1]
     game = play_game(game_config, m)
     replay_buffer.save_game(game)
+
+def train_model(game_config, model_config, storage, replay_buffer):
+  m = model(game_config)
+  while True:
+    optimizer = optim.SGD(m.parameters(), lr=model_config.learning_rate, weight_decay=model_config.weight_decay)
+    for i in range(model_config.training_steps):
+      if replay_buffer.buffer:
+        if i % model_config.checkpoint_interval == 0:
+          storage.append(m)
+        batch = replay_buffer.sample_batch(model_config.num_unroll_steps, model_config.td_steps)
+        update_parameters(optimizer, m, batch)
+      storage.append(m)
+
+def update_parameters(optimizer, m, batch):
+  m.train()
+  p_loss = 0
+  v_loss = 0
+  r_loss = 0
+  for image, actions, targets in batch:
+    reward, state, policy, value = m.initial_inference(image)
+    predictions = [(1, value, reward, policy)]
+    for action in actions:
+      reward, state, policy, value = m.recurrent_inference(state, action)
+      predictions.append((1 / len(actions), value, reward, policy))
+    for prediction, target in zip(predictions, targets):
+      value, reward, policy = prediction[1:]
+      target_value, target_reward, target_policy = target
+      if target_policy:
+        p_loss += torch.sum(-torch.tensor(target_policy) * torch.log(policy))
+        v_loss += torch.sum((torch.tensor([target_value]) - value) ** 2)
+        r_loss += torch.sum((torch.tensor([target_reward]) - value) ** 2)
+  optimizer.zero_grad()
+  loss = p_loss + v_loss + r_loss
+  loss.backward()
+  optimizer.step()
