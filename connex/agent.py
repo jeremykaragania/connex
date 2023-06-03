@@ -47,7 +47,7 @@ class dynamics_function(nn.Module):
     self.r_linear = nn.Linear(game_config.environment_size(), 1)
 
   def forward(self, state, action):
-    s = torch.cat([state, action])
+    s = torch.cat([state, action], dim=1)
     s = self.s_convolution(s)
     for i in self.s_residual_blocks:
       s = i(s)

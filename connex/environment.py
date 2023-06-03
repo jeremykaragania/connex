@@ -74,7 +74,7 @@ class k_in_a_row():
 
   def make_image(self, state_index):
     players = (np.where(self.environment_history[state_index] == 1, 1, 0), np.where(self.environment_history[state_index] == -1, 1, 0))
-    return np.array([players[0], players[1]], dtype=np.float32)
+    return np.array([[players[0], players[1]]], dtype=np.float32)
 
   def make_target(self, state_index, num_unroll_steps, td_steps, discount=0.95):
     targets = []
