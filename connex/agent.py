@@ -18,10 +18,20 @@ class configuration():
     self.learning_rate = learning_rate
     self.weight_decay = weight_decay
 
+class convolution(nn.Module):
+  def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0):
+    super().__init__()
+    self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding)
+    self.bn = nn.BatchNorm2d(out_channels)
+
+  def forward(self, x):
+    ret = self.conv(x)
+    return self.bn(ret)
+
 class residual_block(nn.Module):
   def __init__(self, channels):
     super().__init__()
-    self.conv = nn.Conv2d(channels, channels, 3, padding=1)
+    self.conv = convolution(channels, channels, 3, padding=1)
 
   def forward(self, x):
     return F.relu(self.conv(x) + x)
@@ -29,7 +39,7 @@ class residual_block(nn.Module):
 class representation_function(nn.Module):
   def __init__(self):
     super().__init__()
-    self.convolution = nn.Conv2d(2, 2, 3, padding=1)
+    self.convolution = convolution(2, 2, 3, padding=1)
     self.residual_blocks = nn.ModuleList([residual_block(2) for i in range(2)])
 
   def forward(self, observation):
@@ -41,9 +51,9 @@ class representation_function(nn.Module):
 class dynamics_function(nn.Module):
   def __init__(self, game_config):
     super().__init__()
-    self.s_convolution = nn.Conv2d(4, 2, 3, padding=1)
+    self.s_convolution = convolution(4, 2, 3, padding=1)
     self.s_residual_blocks = nn.ModuleList([residual_block(2) for i in range(2)])
-    self.r_convolution = nn.Conv2d(2, 1, 3, padding=1)
+    self.r_convolution = convolution(2, 1, 3, padding=1)
     self.r_linear = nn.Linear(game_config.environment_size(), 1)
 
   def forward(self, state, action):
@@ -58,9 +68,9 @@ class dynamics_function(nn.Module):
 class prediction_function(nn.Module):
   def __init__(self, game_config):
     super().__init__()
-    self.p_convolutions = nn.ModuleList([nn.Conv2d(2, 4, 1), nn.Conv2d(4, 1, 1)])
+    self.p_convolutions = nn.ModuleList([convolution(2, 4, 1), convolution(4, 1, 1)])
     self.p_linear = nn.Linear(game_config.environment_size(), game_config.action_space_size)
-    self.v_convolutions = nn.ModuleList([nn.Conv2d(2, 4, 1), nn.Conv2d(4, 1, 1)])
+    self.v_convolutions = nn.ModuleList([convolution(2, 4, 1), convolution(4, 1, 1)])
     self.v_linear = nn.Linear(game_config.environment_size(), 1)
 
   def forward(self, state):
