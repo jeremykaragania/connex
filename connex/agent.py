@@ -119,7 +119,7 @@ def run_selfplay(game_config, storage, replay_buffer):
     game = play_game(game_config, m)
     replay_buffer.save_game(game)
 
-def train_model(game_config, model_config, storage, replay_buffer):
+def train_model(game_config, model_config, storage, replay_buffer, verbose=False):
   m = model(game_config)
   while True:
     optimizer = optim.SGD(m.parameters(), lr=model_config.learning_rate, weight_decay=model_config.weight_decay)
@@ -128,10 +128,10 @@ def train_model(game_config, model_config, storage, replay_buffer):
         if i % model_config.checkpoint_interval == 0:
           storage.append(m)
         batch = replay_buffer.sample_batch(model_config.num_unroll_steps, model_config.td_steps)
-        update_parameters(optimizer, m, batch)
+        update_parameters(optimizer, m, batch, verbose)
       storage.append(m)
 
-def update_parameters(optimizer, m, batch):
+def update_parameters(optimizer, m, batch, verbose=False):
   m.train()
   p_loss = 0
   v_loss = 0
@@ -153,3 +153,8 @@ def update_parameters(optimizer, m, batch):
   loss = p_loss + v_loss + r_loss
   loss.backward()
   optimizer.step()
+  if verbose:
+    print(f"Loss:")
+    print(f"{'  Policy:':<16}{p_loss}")
+    print(f"{'  Value:':<16}{v_loss}")
+    print(f"{'  Reward:':<16}{r_loss}")
