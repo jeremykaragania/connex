@@ -1,5 +1,5 @@
-import environment
-import helpers
+import connex.environment as environment
+import connex.helpers as helpers
 import collections
 import numpy as np
 import torch
