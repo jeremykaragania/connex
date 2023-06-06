@@ -4,7 +4,7 @@ import numpy as np
 def visit_softmax_temperature(num_moves):
   return 1 if num_moves > 30 else 0
 
-class min_max_stats():
+class min_max_stats:
   def __init__(self):
     self.maximum = -float("inf")
     self.minimum= float("inf")
@@ -18,7 +18,7 @@ class min_max_stats():
       return (value - self.minimum) / (self.maximum - self.minimum)
     return value
 
-class node():
+class node:
   def __init__(self, prior): 
     self.visit_count = 0
     self.to_play = 1
@@ -95,7 +95,7 @@ def run_mcts(root, action_history, model, action_space_size, num_simulations=64)
     expand_node(node, to_play, [j for j  in range(action_space_size)], model_output)
     backpropagate(search_path, model_output.value, to_play, stats)
 
-class replay_buffer():
+class replay_buffer:
   def __init__(self, window_size, batch_size):
     self.window_size = window_size
     self.batch_size = batch_size

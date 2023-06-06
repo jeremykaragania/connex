@@ -9,7 +9,7 @@ import torch.optim as optim
 
 model_output = collections.namedtuple("model_output", ["reward", "state", "policy", "value"])
 
-class configuration():
+class configuration:
   def __init__(self, training_steps, checkpoint_interval, num_unroll_steps, td_steps, learning_rate, weight_decay):
     self.training_steps = training_steps
     self.checkpoint_interval = checkpoint_interval

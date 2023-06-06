@@ -1,6 +1,6 @@
 import numpy as np
 
-class configuration():
+class configuration:
   def __init__(self, rows, columns, row_length):
     self.rows = rows
     self.columns = columns
@@ -8,7 +8,7 @@ class configuration():
     self.action_space_size = columns
     self.environment_size = lambda: self.rows * self.columns
 
-class k_in_a_row():
+class k_in_a_row:
   def __init__(self, config):
     self.row_length = config.row_length
     self.environment = np.zeros((config.rows, config.columns), dtype=int)
