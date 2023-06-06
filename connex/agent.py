@@ -123,15 +123,15 @@ def run_selfplay(game_config, storage, replay_buffer):
 
 def train_model(game_config, model_config, storage, replay_buffer, verbose=False):
   m = model(game_config)
-  while True:
-    optimizer = optim.SGD(m.parameters(), lr=model_config.learning_rate, weight_decay=model_config.weight_decay)
-    for i in range(model_config.training_steps):
-      if replay_buffer.buffer:
-        if i % model_config.checkpoint_interval == 0:
-          storage.append(m)
-        batch = replay_buffer.sample_batch(model_config.num_unroll_steps, model_config.td_steps)
-        update_parameters(optimizer, m, batch, verbose)
+  optimizer = optim.SGD(m.parameters(), lr=model_config.learning_rate, weight_decay=model_config.weight_decay)
+  while not replay_buffer.buffer:
+    pass
+  for i in range(model_config.training_steps):
+    if i % model_config.checkpoint_interval == 0:
       storage.append(m)
+    batch = replay_buffer.sample_batch(model_config.num_unroll_steps, model_config.td_steps)
+    update_parameters(optimizer, m, batch, verbose)
+  storage.append(m)
 
 def update_parameters(optimizer, m, batch, verbose=False):
   m.train()
