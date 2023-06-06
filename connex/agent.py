@@ -1,6 +1,7 @@
 import connex.environment as environment
 import connex.helpers as helpers
 import collections
+import threading
 import numpy as np
 import torch
 import torch.nn as nn
@@ -115,8 +116,8 @@ def play_game(game_config, model):
     game.store_search_statistics(root)
   return game
 
-def run_selfplay(game_config, storage, replay_buffer):
-  while True:
+def run_selfplay(game_config, storage, replay_buffer, exit_flag):
+  while not exit_flag.is_set():
     m = storage[-1]
     game = play_game(game_config, m)
     replay_buffer.save_game(game)
@@ -160,3 +161,15 @@ def update_parameters(optimizer, m, batch, verbose=False):
     print(f"{'  Policy:':<16}{p_loss}")
     print(f"{'  Value:':<16}{v_loss}")
     print(f"{'  Reward:':<16}{r_loss}")
+
+def learn(game_config, model_config, verbose=False):
+  storage = [model(game_config)]
+  replay_buffer = helpers.replay_buffer(model_config.window_size, model_config.batch_size)
+  exit_selfplay = threading.Event()
+  thread = threading.Thread(target=run_selfplay, args=(game_config, storage, replay_buffer, exit_selfplay))
+  thread.start()
+  try:
+    train_model(game_config, model_config, storage, replay_buffer, verbose)
+  finally:
+    exit_selfplay.set()
+  return storage[-1]
