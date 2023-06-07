@@ -79,7 +79,7 @@ def add_exploration_noise(n, alpha=0.3, frac=0.25):
   for i, j in zip(actions, noise):
     n.children[i].prior = n.children[i].prior * (1 - frac) + j * frac
 
-def run_mcts(root, action_history, model, action_space_size, num_simulations=64):
+def run_mcts(root, action_history, model, action_space_size, num_simulations):
   stats = min_max_stats()
   for i in range(num_simulations):
     history = list(action_history)

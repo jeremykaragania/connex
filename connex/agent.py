@@ -11,9 +11,10 @@ import torch.optim as optim
 model_output = collections.namedtuple("model_output", ["reward", "state", "policy", "value"])
 
 class configuration:
-  def __init__(self, training_steps, checkpoint_interval, window_size, batch_size, num_unroll_steps, td_steps, learning_rate, weight_decay):
+  def __init__(self, training_steps, checkpoint_interval, num_simulations, window_size, batch_size, num_unroll_steps, td_steps, learning_rate, weight_decay):
     self.training_steps = training_steps
     self.checkpoint_interval = checkpoint_interval
+    self.num_simulations = num_simulations
     self.window_size = window_size
     self.batch_size = batch_size
     self.num_unroll_steps = num_unroll_steps
@@ -103,23 +104,23 @@ class model(nn.Module):
     p, v = self.prediction(s)
     return model_output(r, s, p, v.item())
 
-def play_game(game_config, model):
+def play_game(game_config, model_config, model):
   game = environment.k_in_a_row(game_config)
   while not game.is_terminal():
     root = helpers.node(0)
     observation = game.make_image(-1)
     helpers.expand_node(root, game.to_play(), game.legal_actions(), model.initial_inference(observation))
     helpers.add_exploration_noise(root, 0.3)
-    helpers.run_mcts(root, game.action_history, model, game_config.action_space_size)
+    helpers.run_mcts(root, game.action_history, model, game_config.action_space_size, model_config.num_simulations)
     action = helpers.select_action(game_config.action_space_size, len(game.action_history), root, model)
     game.apply(action)
     game.store_search_statistics(root)
   return game
 
-def run_selfplay(game_config, storage, replay_buffer, exit_flag):
+def run_selfplay(game_config, model_config, storage, replay_buffer, exit_flag):
   while not exit_flag.is_set():
     m = storage[-1]
-    game = play_game(game_config, m)
+    game = play_game(game_config, model_config, m)
     replay_buffer.save_game(game)
 
 def train_model(game_config, model_config, storage, replay_buffer, verbose=False):
@@ -166,7 +167,7 @@ def learn(game_config, model_config, verbose=False):
   storage = [model(game_config)]
   replay_buffer = helpers.replay_buffer(model_config.window_size, model_config.batch_size)
   exit_selfplay = threading.Event()
-  thread = threading.Thread(target=run_selfplay, args=(game_config, storage, replay_buffer, exit_selfplay))
+  thread = threading.Thread(target=run_selfplay, args=(game_config, model_config, storage, replay_buffer, exit_selfplay))
   thread.start()
   try:
     train_model(game_config, model_config, storage, replay_buffer, verbose)
