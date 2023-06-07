@@ -112,7 +112,10 @@ class replay_buffer:
     return [(i.make_image(j), i.action_history[j:j+num_unroll_steps], i.make_target(j, num_unroll_steps, td_steps)) for i, j in game_pos]
 
   def sample_game(self):
-    return np.random.choice(self.buffer)
+    try:
+      return np.random.choice(self.buffer)
+    except RuntimeError:
+      return self.sample_game()
 
   def sample_position(self, game):
     return np.random.choice(len(game.environment_history))
