@@ -47,7 +47,7 @@ def select_action(action_space_size, num_moves, n, model):
   temperature = visit_softmax_temperature(num_moves)
   return softmax_sample(visit_counts, temperature)
 
-def ucb_score(parent, child, stats, base=19652, init=1.25, discount=0.95):
+def ucb_score(parent, child, stats, base=19652, init=1.25, discount=1):
   pb_c = math.log((parent.visit_count + base + 1) / base) + init
   pb_c *= math.sqrt(parent.visit_count) / (child.visit_count + 1)
   prior_score = pb_c * child.prior
@@ -66,7 +66,7 @@ def expand_node(n, to_play, actions, output):
   for i, j in policy.items():
     n.children[i] = node(j / policy_sum)
 
-def backpropagate(search_path, value, to_play, stats, discount=0.95):
+def backpropagate(search_path, value, to_play, stats, discount=1):
   for i in reversed(search_path):
     i.value_sum += value if i.to_play == to_play else -value
     i.visit_count += 1
