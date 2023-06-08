@@ -26,6 +26,9 @@ class k_in_a_row:
   def columns(self):
     return self.environment.shape[1]
 
+  def resize(self, rows_init, columns_init):
+    self.environment = np.zeros((rows_init, columns_init), dtype=int)
+
   def is_terminal(self):
     if len(self.action_history) == self.environment.size:
       return True
