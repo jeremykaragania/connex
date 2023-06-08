@@ -1,11 +1,12 @@
 import numpy as np
 
 class configuration:
-  def __init__(self, rows, columns, row_length, apply_function):
+  def __init__(self, rows, columns, row_length, apply_function, legal_actions_function):
     self.rows = rows
     self.columns = columns
     self.row_length = row_length
     self.apply_function = apply_function
+    self.legal_actions_function = legal_actions_function
     self.action_space_size = columns
     self.environment_size = lambda: self.rows * self.columns
 
@@ -13,6 +14,7 @@ class k_in_a_row:
   def __init__(self, config):
     self.row_length = config.row_length
     self.apply_function = config.apply_function
+    self.legal_actions_function = config.legal_actions_function
     self.environment = np.zeros((config.rows, config.columns), dtype=int)
     self.rewards = []
     self.action_history = []
@@ -57,7 +59,7 @@ class k_in_a_row:
     return False
 
   def legal_actions(self):
-    return np.array([i for i in range(self.columns) if self.environment[0][i] == 0])
+    return self.legal_actions_function(self)
 
   def apply(self, action):
     reward = self.apply_function(self, action)
@@ -111,3 +113,6 @@ def drop_apply(game, action):
   elif game.to_play() and action not in game.legal_actions():
     reward = -1
   return reward
+
+def drop_legal_actions(game):
+  return np.array([i for i in range(game.columns) if game.environment[0][i] == 0])
