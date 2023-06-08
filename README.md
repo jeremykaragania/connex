@@ -18,7 +18,8 @@ from connex import agent, environment
 game_config = environment.configuration(
   rows=6,
   columns=7,
-  row_length=4)
+  row_length=4,
+  apply_function=environment.drop_apply)
 
 model_config = agent.configuration(
   training_steps=int(1000e3),
