@@ -1,18 +1,19 @@
 import numpy as np
 
 class configuration:
-  def __init__(self, rows, columns, row_length, apply_function, legal_actions_function):
+  def __init__(self, rows, columns, row_length, action_space_size, apply_function, legal_actions_function):
     self.rows = rows
     self.columns = columns
     self.row_length = row_length
+    self.action_space_size = action_space_size
     self.apply_function = apply_function
     self.legal_actions_function = legal_actions_function
-    self.action_space_size = columns
     self.environment_size = lambda: self.rows * self.columns
 
 class k_in_a_row:
   def __init__(self, config):
     self.row_length = config.row_length
+    self.action_space_size = config.action_space_size
     self.apply_function = config.apply_function
     self.legal_actions_function = config.legal_actions_function
     self.environment = np.zeros((config.rows, config.columns), dtype=int)
@@ -74,7 +75,7 @@ class k_in_a_row:
 
   def store_search_statistics(self, root):
     sum_visits = sum(child.visit_count for child in root.children.values())
-    action_space = [i for i in range(self.columns)]
+    action_space = [i for i in range(self.action_space_size)]
     self.child_visits.append([root.children[i].visit_count / sum_visits if i in root.children else 0 for i in action_space])
     self.root_values.append(root.value())
 
