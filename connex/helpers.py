@@ -62,7 +62,7 @@ def expand_node(n, to_play, actions, output):
   n.state = output.state
   n.reward = output.reward
   policy = ({i: math.exp(output.policy[i]) for i in actions})
-  policy_sum = sum(policy)
+  policy_sum = sum(policy.values())
   for i, j in policy.items():
     n.children[i] = node(j / policy_sum)
 
