@@ -62,7 +62,12 @@ class k_in_a_row:
     return self.legal_actions_function(self)
 
   def apply(self, action):
-    reward = self.apply_function(self, action)
+    self.apply_function(self, action)
+    reward = 0
+    if self.is_terminal() and len(self.action_history) != self.environment.size:
+      reward = self.to_play()
+    elif self.to_play() and action not in self.legal_actions():
+      reward = -1
     self.rewards.append(reward)
     self.action_history.append(action)
     self.environment_history.append(np.copy(self.environment))
@@ -107,12 +112,6 @@ def drop_apply(game, action):
     if game.environment[i][action] == 0:
       game.environment[i][action] = game.to_play()
       break
-  reward = 0
-  if game.is_terminal() and len(game.action_history) != game.environment.size:
-    reward = game.to_play()
-  elif game.to_play() and action not in game.legal_actions():
-    reward = -1
-  return reward
 
 def drop_legal_actions(game):
   return np.array([i for i in range(game.columns) if game.environment[0][i] == 0])
