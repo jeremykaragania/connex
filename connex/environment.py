@@ -1,16 +1,18 @@
 import numpy as np
 
 class configuration:
-  def __init__(self, rows, columns, row_length):
+  def __init__(self, rows, columns, row_length, apply_function):
     self.rows = rows
     self.columns = columns
     self.row_length = row_length
+    self.apply_function = apply_function
     self.action_space_size = columns
     self.environment_size = lambda: self.rows * self.columns
 
 class k_in_a_row:
   def __init__(self, config):
     self.row_length = config.row_length
+    self.apply_function = config.apply_function
     self.environment = np.zeros((config.rows, config.columns), dtype=int)
     self.rewards = []
     self.action_history = []
@@ -58,15 +60,7 @@ class k_in_a_row:
     return np.array([i for i in range(self.columns) if self.environment[0][i] == 0])
 
   def apply(self, action):
-    for i in reversed(range(self.rows)):
-      if self.environment[i][action] == 0:
-        self.environment[i][action] = self.to_play()
-        break
-    reward = 0
-    if self.is_terminal() and len(self.action_history) != self.environment.size:
-      reward = self.to_play()
-    elif self.to_play() and action not in self.legal_actions():
-      reward = -1
+    reward = self.apply_function(self, action)
     self.rewards.append(reward)
     self.action_history.append(action)
     self.environment_history.append(np.copy(self.environment))
@@ -105,3 +99,15 @@ class k_in_a_row:
     if len(self.action_history) % 2 == 0:
       return 1
     return -1
+
+def drop_apply(game, action):
+  for i in reversed(range(game.rows)):
+    if game.environment[i][action] == 0:
+      game.environment[i][action] = game.to_play()
+      break
+  reward = 0
+  if game.is_terminal() and len(game.action_history) != game.environment.size:
+    reward = game.to_play()
+  elif game.to_play() and action not in game.legal_actions():
+    reward = -1
+  return reward
