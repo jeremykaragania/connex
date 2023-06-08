@@ -12,10 +12,7 @@ class configuration:
 
 class k_in_a_row:
   def __init__(self, config):
-    self.row_length = config.row_length
-    self.action_space_size = config.action_space_size
-    self.apply_function = config.apply_function
-    self.legal_actions_function = config.legal_actions_function
+    self.config = config
     self.environment = np.zeros((config.rows, config.columns), dtype=int)
     self.rewards = []
     self.action_history = []
@@ -49,21 +46,21 @@ class k_in_a_row:
         if player == 0:
           continue
         for k in lines:
-          for l in range(self.row_length):
+          for l in range(self.config.row_length):
             try:
               if k(i, j, l) != player:
                 break
             except IndexError:
               break
-            if l == self.row_length - 1:
+            if l == self.config.row_length - 1:
               return True
     return False
 
   def legal_actions(self):
-    return self.legal_actions_function(self)
+    return self.config.legal_actions_function(self)
 
   def apply(self, action):
-    self.apply_function(self, action)
+    self.config.apply_function(self, action)
     reward = 0
     if self.is_terminal() and len(self.action_history) != self.environment.size:
       reward = self.to_play()
@@ -75,7 +72,7 @@ class k_in_a_row:
 
   def store_search_statistics(self, root):
     sum_visits = sum(child.visit_count for child in root.children.values())
-    action_space = [i for i in range(self.action_space_size)]
+    action_space = [i for i in range(self.config.action_space_size)]
     self.child_visits.append([root.children[i].visit_count / sum_visits if i in root.children else 0 for i in action_space])
     self.root_values.append(root.value())
 
