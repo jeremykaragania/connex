@@ -113,3 +113,10 @@ def drop_apply(game, action):
 
 def drop_legal_actions(game):
   return np.array([i for i in range(game.columns) if game.environment[0][i] == 0])
+
+def place_apply(game, action):
+  row, column = np.unravel_index(action, game.environment.shape)
+  game.environment[row][column] = game.to_play()
+
+def place_legal_actions(game):
+  return np.array([i for i in range(game.environment.size) if game.environment.flatten()[i] == 0])
