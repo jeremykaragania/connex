@@ -19,6 +19,7 @@ game_config = environment.configuration(
   rows=6,
   columns=7,
   row_length=4,
+  action_space_size=7,
   apply_function=environment.drop_apply,
   legal_actions_function=environment.drop_legal_actions)
 
