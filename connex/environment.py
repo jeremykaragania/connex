@@ -18,9 +18,11 @@ class k_in_a_row:
     self.child_visits = []
     self.root_values = []
 
+  @property
   def rows(self):
     return self.environment.shape[0]
 
+  @property
   def columns(self):
     return self.environment.shape[1]
 
@@ -33,8 +35,8 @@ class k_in_a_row:
       lambda x, y, d: self.environment[x+d][y+d],
       lambda x, y, d: self.environment[x+d][y-d] if y - d > 0 else 0
     )
-    for i in range(self.rows()):
-      for j in range(self.columns()):
+    for i in range(self.rows):
+      for j in range(self.columns):
         player = self.environment[i][j]
         if player == 0:
           continue
@@ -50,10 +52,10 @@ class k_in_a_row:
     return False
 
   def legal_actions(self):
-    return np.array([i for i in range(self.columns()) if self.environment[0][i] == 0])
+    return np.array([i for i in range(self.columns) if self.environment[0][i] == 0])
 
   def apply(self, action):
-    for i in reversed(range(self.rows())):
+    for i in reversed(range(self.rows)):
       if self.environment[i][action] == 0:
         self.environment[i][action] = self.to_play()
         break
@@ -68,7 +70,7 @@ class k_in_a_row:
 
   def store_search_statistics(self, root):
     sum_visits = sum(child.visit_count for child in root.children.values())
-    action_space = [i for i in range(self.columns())]
+    action_space = [i for i in range(self.columns)]
     self.child_visits.append([root.children[i].visit_count / sum_visits if i in root.children else 0 for i in action_space])
     self.root_values.append(root.value())
 
