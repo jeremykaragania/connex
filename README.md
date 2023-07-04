@@ -1,5 +1,5 @@
 # Connex
-A toy MuZero k-in-a-row game engine.
+A MuZero k-in-a-row game engine.
 
 ## Installation
 Clone the repository.
