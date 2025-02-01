@@ -1,5 +1,5 @@
 # Connex
-A MuZero k-in-a-row game engine.
+An implementation of MuZero for k-in-a-row games.
 
 ## Installation
 ```bash
