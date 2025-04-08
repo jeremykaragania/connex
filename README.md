@@ -2,9 +2,9 @@
 An implementation of MuZero for k-in-a-row games.
 
 ## Installation
-```sh
-$ git clone https://github.com/jeremykaragania/connex.git
-$ python3 -m pip install -e connex
+```bash
+git clone https://github.com/jeremykaragania/connex.git
+python3 -m pip install -e connex
 ```
 
 ## Usage
